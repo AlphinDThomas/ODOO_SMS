@@ -4,9 +4,7 @@ import {
   AlertCircle,
   ArrowRight,
   Calendar,
-  Check,
   CheckCircle2,
-  Clock,
   DollarSign,
   FileText,
   Layers,
@@ -75,7 +73,6 @@ export function CustomerPortalPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
-  const [acceptingId, setAcceptingId] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   async function loadData(showLoading = true) {
@@ -110,33 +107,11 @@ export function CustomerPortalPage() {
     await loadData(false);
   }
 
-  async function handleAcceptQuotation(subscriptionId) {
-    setError('');
-    setActionSuccess('');
-    setAcceptingId(subscriptionId);
-
-    try {
-      const { data } = await api.post(`/portal/quotations/${subscriptionId}/accept`);
-      setActionSuccess(data?.message || 'Quotation accepted! Subscription is now confirmed.');
-      await refreshData();
-    } catch (err) {
-      console.error('Accept quotation failed:', err);
-      setError(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
-          'Failed to accept quotation. It may have expired or changed.',
-      );
-    } finally {
-      setAcceptingId(null);
-    }
-  }
-
-  // Summary Metrics Calculations
+  // Summary Metrics
   const activeSubs = subscriptions.filter((s) => s.status === 'ACTIVE');
   const totalBalanceDue = invoices.reduce((sum, inv) => sum + (Number(inv.balanceDue) || 0), 0);
   const paidInvoicesCount = invoices.filter((inv) => inv.status === 'PAID').length;
 
-  // Find next renewal
   const upcomingRenewals = subscriptions
     .filter((s) => s.status === 'ACTIVE' && s.nextBillingDate)
     .sort((a, b) => new Date(a.nextBillingDate) - new Date(b.nextBillingDate));
@@ -146,14 +121,14 @@ export function CustomerPortalPage() {
     return (
       <div className="flex min-h-[55vh] flex-col items-center justify-center space-y-3">
         <RefreshCw className="size-8 animate-spin text-slate-400" />
-        <p className="text-sm font-medium text-slate-500">Loading Customer Dashboard…</p>
+        <p className="text-sm font-medium text-slate-500">Loading Dashboard…</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      {/* Header Banner */}
+      {/* Header Banner - Consistent with all modules */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
@@ -172,11 +147,11 @@ export function CustomerPortalPage() {
 
         <div className="flex items-center gap-2">
           <Link
-            to="/customer/catalog"
+            to="/customer/subscriptions"
             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors"
           >
-            <Package className="size-3.5" />
-            Browse Products & Plans
+            <Layers className="size-3.5" />
+            My Subscriptions
           </Link>
           <Button
             variant="outline"
@@ -219,7 +194,7 @@ export function CustomerPortalPage() {
         </div>
       )}
 
-      {/* SECTION 1: Summary KPI Metrics */}
+      {/* KPI Overview Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Metric 1: Active Subscriptions */}
         <Card className="border-slate-200 shadow-xs">
@@ -310,39 +285,42 @@ export function CustomerPortalPage() {
         </Card>
       </div>
 
-      {/* SECTION 2: My Subscriptions */}
-      <section id="subscriptions" className="space-y-4">
+      {/* SECTION 1: Subscriptions Snapshot */}
+      <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Layers className="size-5 text-indigo-600" />
-            <h2 className="text-lg font-semibold text-slate-900">My Subscriptions</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Current Subscriptions</h2>
           </div>
-          <span className="text-xs text-slate-500">
-            {subscriptions.length} {subscriptions.length === 1 ? 'Subscription' : 'Subscriptions'}
-          </span>
+          <Link
+            to="/customer/subscriptions"
+            className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+          >
+            Manage All Subscriptions ({subscriptions.length})
+            <ArrowRight className="size-3.5" />
+          </Link>
         </div>
 
         {subscriptions.length === 0 ? (
-          <Card className="border-dashed border-slate-200 p-8 text-center">
-            <Layers className="mx-auto size-10 text-slate-300 mb-2" />
-            <h3 className="text-base font-semibold text-slate-900">No subscriptions found</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              You do not have any active subscriptions yet. Explore our software plans and modules
-              to get started.
+          <Card className="border-dashed border-slate-200 p-8 text-center bg-slate-50/50">
+            <Layers className="mx-auto size-9 text-slate-300 mb-2" />
+            <p className="text-sm font-semibold text-slate-800">No subscriptions found</p>
+            <p className="text-xs text-slate-500 mt-1">
+              Explore our software plans and modules to get started.
             </p>
             <div className="mt-4">
               <Link
                 to="/customer/catalog"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800"
               >
                 <Package className="size-3.5" />
-                Explore Subscription Plans
+                Browse Catalog
               </Link>
             </div>
           </Card>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {subscriptions.map((sub) => {
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {subscriptions.slice(0, 3).map((sub) => {
               const linesTotal =
                 sub.lines?.reduce((sum, l) => {
                   const amt =
@@ -352,15 +330,10 @@ export function CustomerPortalPage() {
                   return sum + amt;
                 }, 0) || Number(sub.plan?.amount || 0);
 
-              const isQuotation = sub.status === 'QUOTATION';
-
               return (
                 <Card
                   key={sub.id}
-                  className={cn(
-                    'flex flex-col justify-between border-slate-200 shadow-xs hover:border-slate-300 transition-all',
-                    isQuotation && 'border-amber-300 bg-amber-50/15',
-                  )}
+                  className="flex flex-col justify-between border-slate-200 shadow-xs hover:border-slate-300 transition-all bg-white"
                 >
                   <CardHeader className="p-5 pb-3">
                     <div className="flex items-start justify-between gap-2">
@@ -375,12 +348,10 @@ export function CustomerPortalPage() {
                       <StatusBadge status={sub.status} />
                     </div>
                   </CardHeader>
-
-                  <CardContent className="space-y-4 p-5 pt-0">
-                    {/* Recurring Cost Banner */}
-                    <div className="rounded-lg bg-slate-50 p-3 border border-slate-100 flex items-baseline justify-between">
+                  <CardContent className="space-y-3 p-5 pt-0">
+                    <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-100 flex items-baseline justify-between">
                       <span className="text-xs font-medium text-slate-500">Recurring Total</span>
-                      <span className="text-lg font-bold text-slate-900">
+                      <span className="text-base font-bold text-slate-900">
                         {formatCurrency(linesTotal)}
                         <span className="text-xs font-normal text-slate-500">
                           /{sub.billingInterval?.toLowerCase()}
@@ -388,74 +359,18 @@ export function CustomerPortalPage() {
                       </span>
                     </div>
 
-                    {/* Term Details */}
-                    <div className="space-y-2 text-xs text-slate-600">
-                      <div className="flex justify-between py-1 border-b border-slate-100">
-                        <span className="text-slate-400">Term Start</span>
-                        <span className="font-medium text-slate-800">
-                          {formatDate(sub.startDate)}
+                    <div className="text-xs text-slate-600 space-y-1.5">
+                      <div className="flex justify-between py-0.5">
+                        <span className="text-slate-400">Next Billing Cycle</span>
+                        <span className="font-semibold text-indigo-700">
+                          {sub.nextBillingDate ? formatDate(sub.nextBillingDate) : '—'}
                         </span>
                       </div>
-                      <div className="flex justify-between py-1 border-b border-slate-100">
+                      <div className="flex justify-between py-0.5">
                         <span className="text-slate-400">Term Expiry</span>
-                        <span className="font-medium text-slate-800">
-                          {formatDate(sub.expiryDate)}
-                        </span>
-                      </div>
-                      {sub.nextBillingDate && (
-                        <div className="flex justify-between py-1 border-b border-slate-100">
-                          <span className="text-slate-400">Next Billing</span>
-                          <span className="font-medium text-indigo-700">
-                            {formatDate(sub.nextBillingDate)}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex justify-between py-1">
-                        <span className="text-slate-400">Payment Terms</span>
-                        <span className="font-medium text-slate-800">
-                          Net {sub.paymentTermsDays} Days
-                        </span>
+                        <span className="font-medium text-slate-800">{formatDate(sub.expiryDate)}</span>
                       </div>
                     </div>
-
-                    {/* Included Line Items */}
-                    {sub.lines?.length > 0 && (
-                      <div className="pt-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                          Included Products
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {sub.lines.map((line) => (
-                            <span
-                              key={line.id}
-                              className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700"
-                            >
-                              {line.product?.name} × {line.quantity}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Quotation Acceptance Action */}
-                    {isQuotation && (
-                      <div className="pt-2 border-t border-amber-200">
-                        <Button
-                          className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold"
-                          disabled={acceptingId === sub.id}
-                          onClick={() => handleAcceptQuotation(sub.id)}
-                        >
-                          {acceptingId === sub.id ? (
-                            <>
-                              <RefreshCw className="size-3.5 animate-spin mr-1.5" />
-                              Accepting Offer…
-                            </>
-                          ) : (
-                            'Accept & Confirm Offer'
-                          )}
-                        </Button>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               );
@@ -464,8 +379,8 @@ export function CustomerPortalPage() {
         )}
       </section>
 
-      {/* SECTION 3: Invoices & Receipts */}
-      <section id="invoices" className="space-y-4 pt-2">
+      {/* SECTION 2: Invoices Snapshot */}
+      <section className="space-y-4 pt-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Receipt className="size-5 text-emerald-600" />
@@ -475,18 +390,17 @@ export function CustomerPortalPage() {
             to="/customer/invoices"
             className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
           >
-            View All Invoices
+            View All Invoices ({invoices.length})
             <ArrowRight className="size-3.5" />
           </Link>
         </div>
 
         {invoices.length === 0 ? (
-          <Card className="border-dashed border-slate-200 p-8 text-center">
-            <FileText className="mx-auto size-10 text-slate-300 mb-2" />
-            <h3 className="text-base font-semibold text-slate-900">No invoices generated yet</h3>
+          <Card className="border-dashed border-slate-200 p-8 text-center bg-slate-50/50">
+            <FileText className="mx-auto size-9 text-slate-300 mb-2" />
+            <p className="text-sm font-semibold text-slate-800">No invoices generated yet</p>
             <p className="text-xs text-slate-500 mt-1">
-              Invoices for active billing cycles will be available for viewing, payment, and
-              download here.
+              Invoices for your active billing cycles will be available here.
             </p>
           </Card>
         ) : (
@@ -504,7 +418,7 @@ export function CustomerPortalPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {invoices.slice(0, 6).map((inv) => (
+                {invoices.slice(0, 5).map((inv) => (
                   <tr key={inv.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-4 py-3 font-mono font-semibold text-slate-800">
                       {inv.number || inv.invoiceNumber}
@@ -580,7 +494,7 @@ export function CustomerPortalPage() {
               </div>
             </div>
 
-            {/* Printable Document Body */}
+            {/* Document Body */}
             <div className="space-y-6">
               <div className="flex items-start justify-between">
                 <div>

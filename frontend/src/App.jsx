@@ -12,6 +12,7 @@ import { TaxesPage } from '@/pages/admin/TaxesPage';
 import { DiscountsPage } from '@/pages/admin/DiscountsPage';
 import { CustomerPortalPage } from '@/pages/customer/CustomerPortalPage';
 import { CustomerCatalogPage } from '@/pages/customer/CustomerCatalogPage';
+import { CustomerSubscriptionsPage } from '@/pages/customer/CustomerSubscriptionsPage';
 import { CustomerNotificationsPage } from '@/pages/customer/CustomerNotificationsPage';
 import { CustomerProfilePage } from '@/pages/customer/CustomerProfilePage';
 import { FinanceDashboardPage } from '@/pages/dashboards/FinanceDashboardPage';
@@ -78,6 +79,7 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route path="/customer" element={<CustomerPortalPage />} />
           <Route path="/customer/catalog" element={<CustomerCatalogPage />} />
+          <Route path="/customer/subscriptions" element={<CustomerSubscriptionsPage />} />
           <Route path="/customer/invoices" element={<InvoicesPage />} />
           <Route path="/customer/invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="/customer/notifications" element={<CustomerNotificationsPage />} />
