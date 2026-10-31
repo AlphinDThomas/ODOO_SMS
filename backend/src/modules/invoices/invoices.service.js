@@ -49,13 +49,15 @@ export async function listInvoices({
     ];
   }
 
-  const skip = (page - 1) * pageSize;
+  const pageNum = Math.max(1, Number(page) || 1);
+  const limit = Math.max(1, Math.min(100, Number(pageSize) || 20));
+  const skip = (pageNum - 1) * limit;
 
   const [invoices, total, allUnpaid, allPaid, allOverdue] = await Promise.all([
     prisma.invoice.findMany({
       where,
       skip,
-      take: pageSize,
+      take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
         customer: {
@@ -109,9 +111,9 @@ export async function listInvoices({
         toUtcDate(inv.dueDate).getTime() < today.getTime(),
     })),
     total,
-    page,
-    pageSize,
-    totalPages: Math.ceil(total / pageSize) || 1,
+    page: pageNum,
+    pageSize: limit,
+    totalPages: Math.ceil(total / limit) || 1,
     metrics: {
       totalDue: Number(allUnpaid._sum.balanceDue || 0),
       totalPaid: Number(allPaid._sum.amountPaid || 0),

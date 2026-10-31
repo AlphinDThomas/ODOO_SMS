@@ -98,13 +98,15 @@ export async function listPayments({ actor, invoiceId, customerId, page = 1, pag
     where.invoiceId = invoiceId;
   }
 
-  const skip = (page - 1) * pageSize;
+  const pageNum = Math.max(1, Number(page) || 1);
+  const limit = Math.max(1, Math.min(100, Number(pageSize) || 20));
+  const skip = (pageNum - 1) * limit;
 
   const [payments, total] = await Promise.all([
     prisma.payment.findMany({
       where,
       skip,
-      take: pageSize,
+      take: limit,
       orderBy: { paidAt: 'desc' },
       include: {
         invoice: {
