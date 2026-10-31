@@ -11,6 +11,9 @@ import { PlansPage } from '@/pages/admin/PlansPage';
 import { TaxesPage } from '@/pages/admin/TaxesPage';
 import { DiscountsPage } from '@/pages/admin/DiscountsPage';
 import { CustomerPortalPage } from '@/pages/customer/CustomerPortalPage';
+import { CustomerCatalogPage } from '@/pages/customer/CustomerCatalogPage';
+import { CustomerNotificationsPage } from '@/pages/customer/CustomerNotificationsPage';
+import { CustomerProfilePage } from '@/pages/customer/CustomerProfilePage';
 import { FinanceDashboardPage } from '@/pages/dashboards/FinanceDashboardPage';
 import { InvoicesPage } from '@/pages/invoices/InvoicesPage';
 import { InvoiceDetailPage } from '@/pages/invoices/InvoiceDetailPage';
@@ -74,8 +77,11 @@ export default function App() {
       <Route element={<ProtectedRoute roles={['CUSTOMER']} />}>
         <Route element={<AppShell />}>
           <Route path="/customer" element={<CustomerPortalPage />} />
+          <Route path="/customer/catalog" element={<CustomerCatalogPage />} />
           <Route path="/customer/invoices" element={<InvoicesPage />} />
           <Route path="/customer/invoices/:id" element={<InvoiceDetailPage />} />
+          <Route path="/customer/notifications" element={<CustomerNotificationsPage />} />
+          <Route path="/customer/profile" element={<CustomerProfilePage />} />
         </Route>
       </Route>
     </Routes>

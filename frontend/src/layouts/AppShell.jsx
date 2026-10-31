@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
+  Bell,
   Building2,
   ChevronDown,
   FileText,
@@ -14,6 +15,7 @@ import {
   Receipt,
   Sparkles,
   Tag,
+  User,
   Users,
   Workflow,
   X,
@@ -43,10 +45,13 @@ const NAV = {
     { to: '/staff/templates', label: 'Quotation Templates', icon: FileText },
   ],
   CUSTOMER: [
-    { to: '/customer', label: 'Customer Portal', icon: LayoutDashboard },
+    { to: '/customer', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/customer/catalog', label: 'Products & Plans', icon: Package },
     { to: '/customer#quotes', label: 'Quotes & Offers', icon: Sparkles },
     { to: '/customer#subscriptions', label: 'My Subscriptions', icon: Layers },
-    { to: '/customer#invoices', label: 'Invoices & Receipts', icon: Receipt },
+    { to: '/customer/invoices', label: 'Invoices & Payments', icon: Receipt },
+    { to: '/customer/notifications', label: 'Notifications', icon: Bell },
+    { to: '/customer/profile', label: 'My Profile', icon: User },
   ],
 };
 
@@ -209,7 +214,19 @@ export function AppShell() {
               <nav className="flex flex-col gap-1">
                 {links.map((link) => {
                   const Icon = link.icon;
-                  return (
+                  const isAnchor = link.to.includes('#');
+
+                  return isAnchor ? (
+                    <a
+                      key={link.to}
+                      href={link.to}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    >
+                      {Icon && <Icon className="size-4 text-slate-400" />}
+                      <span>{link.label}</span>
+                    </a>
+                  ) : (
                     <NavLink
                       key={link.to}
                       to={link.to}
