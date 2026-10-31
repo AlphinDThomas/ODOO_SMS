@@ -26,23 +26,12 @@ export async function registerCustomer({ email, password, fullName, companyName 
     throw new HttpError(409, 'An account with this email already exists');
   }
 
-  const { data, error } = await authClient.auth.signUp({
+  const user = await createAuthUser({
     email,
     password,
-    options: { data: { fullName } },
+    fullName,
+    emailConfirm: true,
   });
-
-  if (error) {
-    if (String(error.message).toLowerCase().includes('already')) {
-      throw new HttpError(409, 'An account with this email already exists');
-    }
-    throw new HttpError(400, error.message);
-  }
-
-  const user = data.user;
-  if (!user?.id) {
-    throw new HttpError(400, 'Registration did not return a user. Confirm email settings in Supabase Auth.');
-  }
 
   try {
     return await prisma.$transaction(async (tx) => {
