@@ -6,7 +6,8 @@ import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { UsersPage } from '@/pages/admin/UsersPage';
-import { RoleHome } from '@/pages/dashboards/RoleHome';
+import { CustomerPortalPage } from '@/pages/customer/CustomerPortalPage';
+import { FinanceDashboardPage } from '@/pages/dashboards/FinanceDashboardPage';
 
 function HomeRedirect() {
   const { loading, profile, session } = useAuth();
@@ -25,22 +26,25 @@ export default function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
+      {/* Admin Protected Routes */}
       <Route element={<ProtectedRoute roles={['ADMIN']} />}>
         <Route element={<AppShell />}>
-          <Route path="/admin" element={<RoleHome role="ADMIN" />} />
+          <Route path="/admin" element={<FinanceDashboardPage role="ADMIN" />} />
           <Route path="/admin/users" element={<UsersPage />} />
         </Route>
       </Route>
 
+      {/* Staff Protected Routes */}
       <Route element={<ProtectedRoute roles={['STAFF']} />}>
         <Route element={<AppShell />}>
-          <Route path="/staff" element={<RoleHome role="STAFF" />} />
+          <Route path="/staff" element={<FinanceDashboardPage role="STAFF" />} />
         </Route>
       </Route>
 
+      {/* Customer Protected Routes */}
       <Route element={<ProtectedRoute roles={['CUSTOMER']} />}>
         <Route element={<AppShell />}>
-          <Route path="/customer" element={<RoleHome role="CUSTOMER" />} />
+          <Route path="/customer" element={<CustomerPortalPage />} />
         </Route>
       </Route>
     </Routes>

@@ -5,6 +5,8 @@ import { env } from './config/env.js';
 import { openapiDocument } from './docs/openapi.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authRouter, usersRouter } from './modules/auth/auth.routes.js';
+import { portalRouter } from './modules/portal/portal.routes.js';
+import { reportsRouter } from './modules/reports/reports.routes.js';
 
 export function createApp() {
   const app = express();
@@ -26,6 +28,8 @@ export function createApp() {
 
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/users', usersRouter);
+  app.use('/api/v1/portal', portalRouter);
+  app.use('/api/v1/reports', reportsRouter);
 
   app.use(errorHandler);
   return app;
