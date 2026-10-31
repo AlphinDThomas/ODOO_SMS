@@ -10,8 +10,14 @@ export function errorHandler(err, _req, res, _next) {
   }
 
   if (err instanceof ZodError) {
+    const firstIssue = err.issues?.[0];
+    const fieldName = firstIssue?.path?.filter((p) => p !== 'body' && p !== 'query' && p !== 'params').join('.');
+    const errorMessage = firstIssue
+      ? (fieldName ? `${fieldName}: ${firstIssue.message}` : firstIssue.message)
+      : 'Validation failed';
+
     return res.status(400).json({
-      error: 'Validation failed',
+      error: errorMessage,
       details: err.flatten(),
     });
   }

@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label';
 export function UsersPage() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [form, setForm] = useState({ email: '', password: '', fullName: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   async function load() {
     const { data } = await api.get('/users');
-    setUsers(data.items);
+    setUsers(data.items || []);
   }
 
   useEffect(() => {
@@ -22,12 +24,17 @@ export function UsersPage() {
   async function onCreate(event) {
     event.preventDefault();
     setError('');
+    setSuccess('');
+    setSubmitting(true);
     try {
       await api.post('/users/staff', form);
       setForm({ email: '', password: '', fullName: '' });
+      setSuccess('Staff account created successfully!');
       await load();
     } catch (err) {
-      setError(err.response?.data?.error || 'Could not create staff');
+      setError(err.response?.data?.error || err.message || 'Could not create staff');
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -67,9 +74,15 @@ export function UsersPage() {
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
               />
+              <p className="text-xs text-slate-500">
+                More than 8 characters, with uppercase, lowercase, and a special character (e.g. Staff@12345).
+              </p>
             </div>
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
-            <Button type="submit">Create staff account</Button>
+            {success ? <p className="text-sm text-emerald-600">{success}</p> : null}
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Creating…' : 'Create staff account'}
+            </Button>
           </form>
         </CardContent>
       </Card>
