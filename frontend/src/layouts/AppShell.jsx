@@ -7,10 +7,17 @@ import { cn } from '@/lib/utils';
 const NAV = {
   ADMIN: [
     { to: '/admin', label: 'Dashboard' },
+    { to: '/admin/invoices', label: 'Invoices & Billing' },
     { to: '/admin/users', label: 'Users' },
   ],
-  STAFF: [{ to: '/staff', label: 'Dashboard' }],
-  CUSTOMER: [{ to: '/customer', label: 'Dashboard' }],
+  STAFF: [
+    { to: '/staff', label: 'Dashboard' },
+    { to: '/staff/invoices', label: 'Invoices & Billing' },
+  ],
+  CUSTOMER: [
+    { to: '/customer', label: 'Dashboard' },
+    { to: '/customer/invoices', label: 'My Invoices' },
+  ],
 };
 
 export function AppShell() {
