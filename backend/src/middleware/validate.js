@@ -12,6 +12,8 @@ export function validate(schema) {
       }
 
       if (parsed.query !== undefined) {
+        // Express 5 makes req.query a getter on Request prototype;
+        // Object.defineProperty safely sets it on the request instance
         Object.defineProperty(req, 'query', {
           value: parsed.query,
           writable: true,
@@ -29,6 +31,7 @@ export function validate(schema) {
         });
       }
 
+      req.validated = parsed;
       next();
     } catch (error) {
       next(error);

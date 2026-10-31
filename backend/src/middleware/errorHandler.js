@@ -10,8 +10,14 @@ export function errorHandler(err, _req, res, _next) {
   }
 
   if (err instanceof ZodError) {
+    const firstIssue = err.issues?.[0];
+    const fieldName = firstIssue?.path?.filter((p) => p !== 'body' && p !== 'query' && p !== 'params').join('.');
+    const errorMessage = firstIssue
+      ? (fieldName ? `${fieldName}: ${firstIssue.message}` : firstIssue.message)
+      : 'Validation failed';
+
     return res.status(400).json({
-      error: 'Validation failed',
+      error: errorMessage,
       details: err.flatten(),
     });
   }
@@ -34,6 +40,6 @@ export function errorHandler(err, _req, res, _next) {
 
   console.error(err);
   return res.status(500).json({
-    error: err.message || 'Internal server error',
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : (err.message || 'Internal server error'),
   });
 }

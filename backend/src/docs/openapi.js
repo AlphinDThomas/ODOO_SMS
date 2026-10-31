@@ -3,7 +3,7 @@ export const openapiDocument = {
   info: {
     title: 'Brightloop Subscription Management System API',
     version: '1.0.0',
-    description: 'API documentation for Brightloop SMS, including Customers, Quotations, and Subscriptions.',
+    description: 'API documentation for Brightloop SMS, including Customers, Quotations, Subscriptions, Invoices, Billing, and Reports.',
   },
   servers: [{ url: '/api/v1' }],
   components: {
@@ -169,6 +169,51 @@ export const openapiDocument = {
         summary: 'Close subscription (Staff, Admin) - validates plan.allowEarlyClose if before expiry',
         security: [{ bearerAuth: [] }],
         responses: { 200: { description: 'Subscription closed' } },
+      },
+    },
+    '/portal/subscriptions': {
+      get: {
+        summary: 'List authenticated customer subscriptions',
+        security: [{ bearerAuth: [] }],
+        responses: { 200: { description: 'Customer subscriptions list' } },
+      },
+    },
+    '/portal/quotations/{id}/accept': {
+      post: {
+        summary: 'Accept an open quotation on behalf of authenticated customer',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', format: 'uuid' },
+          },
+        ],
+        responses: {
+          200: { description: 'Quotation accepted and confirmed' },
+          403: { description: 'Unauthorized / Customer mismatch' },
+          404: { description: 'Quotation not found' },
+          409: { description: 'Quotation expired or not in quotation status' },
+        },
+      },
+    },
+    '/portal/invoices': {
+      get: {
+        summary: 'List authenticated customer invoices and receipts',
+        security: [{ bearerAuth: [] }],
+        responses: { 200: { description: 'Customer invoices and payment receipts' } },
+      },
+    },
+    '/reports/finance': {
+      get: {
+        summary: 'Executive Finance Analytics KPI report (Admin/Staff)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'startDate', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'endDate', in: 'query', schema: { type: 'string', format: 'date' } },
+        ],
+        responses: { 200: { description: 'Aggregated financial metrics and overdue collections' } },
       },
     },
   },
