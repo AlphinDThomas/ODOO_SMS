@@ -9,6 +9,10 @@ const NAV = {
     { to: '/admin', label: 'Dashboard' },
     { to: '/admin/invoices', label: 'Invoices & Billing' },
     { to: '/admin/users', label: 'Users' },
+    { to: '/admin/products', label: 'Products' },
+    { to: '/admin/plans', label: 'Plans' },
+    { to: '/admin/taxes', label: 'Taxes' },
+    { to: '/admin/discounts', label: 'Discounts' },
   ],
   STAFF: [
     { to: '/staff', label: 'Dashboard' },

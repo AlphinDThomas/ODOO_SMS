@@ -8,6 +8,10 @@ import { authRouter, usersRouter } from './modules/auth/auth.routes.js';
 import { billingRouter } from './modules/billing/billing.routes.js';
 import { invoicesRouter } from './modules/invoices/invoices.routes.js';
 import { paymentsRouter } from './modules/payments/payments.routes.js';
+import { discountsRouter } from './modules/discounts/discount.routes.js';
+import { plansRouter } from './modules/plans/plan.routes.js';
+import { productsRouter } from './modules/products/product.routes.js';
+import { taxRulesRouter } from './modules/taxes/tax.routes.js';
 
 export function createApp() {
   const app = express();
@@ -36,6 +40,10 @@ export function createApp() {
 
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/users', usersRouter);
+  app.use('/api/v1/products', productsRouter);
+  app.use('/api/v1/plans', plansRouter);
+  app.use('/api/v1/taxes', taxRulesRouter);
+  app.use('/api/v1/discounts', discountsRouter);
   app.use('/api/v1/billing', billingRouter);
   app.use('/api/v1/invoices', invoicesRouter);
   app.use('/api/v1/payments', paymentsRouter);
