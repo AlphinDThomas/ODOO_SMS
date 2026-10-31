@@ -10,7 +10,8 @@ import { ProductsPage } from '@/pages/admin/ProductsPage';
 import { PlansPage } from '@/pages/admin/PlansPage';
 import { TaxesPage } from '@/pages/admin/TaxesPage';
 import { DiscountsPage } from '@/pages/admin/DiscountsPage';
-import { RoleHome } from '@/pages/dashboards/RoleHome';
+import { CustomerPortalPage } from '@/pages/customer/CustomerPortalPage';
+import { FinanceDashboardPage } from '@/pages/dashboards/FinanceDashboardPage';
 import { InvoicesPage } from '@/pages/invoices/InvoicesPage';
 import { InvoiceDetailPage } from '@/pages/invoices/InvoiceDetailPage';
 
@@ -31,33 +32,33 @@ export default function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-      {/* Admin routes */}
+      {/* Admin Protected Routes */}
       <Route element={<ProtectedRoute roles={['ADMIN']} />}>
         <Route element={<AppShell />}>
-          <Route path="/admin" element={<RoleHome role="ADMIN" />} />
+          <Route path="/admin" element={<FinanceDashboardPage role="ADMIN" />} />
+          <Route path="/admin/invoices" element={<InvoicesPage />} />
+          <Route path="/admin/invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/admin/products" element={<ProductsPage />} />
           <Route path="/admin/plans" element={<PlansPage />} />
           <Route path="/admin/taxes" element={<TaxesPage />} />
           <Route path="/admin/discounts" element={<DiscountsPage />} />
-          <Route path="/admin/invoices" element={<InvoicesPage />} />
-          <Route path="/admin/invoices/:id" element={<InvoiceDetailPage />} />
         </Route>
       </Route>
 
-      {/* Staff routes */}
+      {/* Staff Protected Routes */}
       <Route element={<ProtectedRoute roles={['STAFF']} />}>
         <Route element={<AppShell />}>
-          <Route path="/staff" element={<RoleHome role="STAFF" />} />
+          <Route path="/staff" element={<FinanceDashboardPage role="STAFF" />} />
           <Route path="/staff/invoices" element={<InvoicesPage />} />
           <Route path="/staff/invoices/:id" element={<InvoiceDetailPage />} />
         </Route>
       </Route>
 
-      {/* Customer routes */}
+      {/* Customer Protected Routes */}
       <Route element={<ProtectedRoute roles={['CUSTOMER']} />}>
         <Route element={<AppShell />}>
-          <Route path="/customer" element={<RoleHome role="CUSTOMER" />} />
+          <Route path="/customer" element={<CustomerPortalPage />} />
           <Route path="/customer/invoices" element={<InvoicesPage />} />
           <Route path="/customer/invoices/:id" element={<InvoiceDetailPage />} />
         </Route>
