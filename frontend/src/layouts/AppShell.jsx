@@ -47,7 +47,6 @@ const NAV = {
   CUSTOMER: [
     { to: '/customer', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/customer/catalog', label: 'Products & Plans', icon: Package },
-    { to: '/customer#quotes', label: 'Quotes & Offers', icon: Sparkles },
     { to: '/customer#subscriptions', label: 'My Subscriptions', icon: Layers },
     { to: '/customer/invoices', label: 'Invoices & Payments', icon: Receipt },
     { to: '/customer/notifications', label: 'Notifications', icon: Bell },
