@@ -6,6 +6,10 @@ import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { UsersPage } from '@/pages/admin/UsersPage';
+import { ProductsPage } from '@/pages/admin/ProductsPage';
+import { PlansPage } from '@/pages/admin/PlansPage';
+import { TaxesPage } from '@/pages/admin/TaxesPage';
+import { DiscountsPage } from '@/pages/admin/DiscountsPage';
 import { RoleHome } from '@/pages/dashboards/RoleHome';
 
 function HomeRedirect() {
@@ -29,6 +33,10 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route path="/admin" element={<RoleHome role="ADMIN" />} />
           <Route path="/admin/users" element={<UsersPage />} />
+          <Route path="/admin/products" element={<ProductsPage />} />
+          <Route path="/admin/plans" element={<PlansPage />} />
+          <Route path="/admin/taxes" element={<TaxesPage />} />
+          <Route path="/admin/discounts" element={<DiscountsPage />} />
         </Route>
       </Route>
 
