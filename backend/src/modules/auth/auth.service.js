@@ -1,13 +1,14 @@
 import { prisma } from '../../config/prisma.js';
-import { adminAuthClient, authClient } from '../../config/supabase.js';
+import { adminAuthClient } from '../../config/supabase.js';
 import { HttpError } from '../../utils/httpError.js';
 
-async function createAuthUser({ email, password, fullName, emailConfirm }) {
+async function createAuthUser({ email, password, fullName, emailConfirm, role }) {
   const { data, error } = await adminAuthClient.auth.admin.createUser({
     email,
     password,
     email_confirm: emailConfirm,
-    user_metadata: { fullName },
+    app_metadata: { role },
+    user_metadata: { fullName, role },
   });
 
   if (error) {
@@ -26,23 +27,14 @@ export async function registerCustomer({ email, password, fullName, companyName 
     throw new HttpError(409, 'An account with this email already exists');
   }
 
-  const { data, error } = await authClient.auth.signUp({
+  // Use admin client with email_confirm: true to prevent hitting Supabase free-tier SMTP rate limits
+  const user = await createAuthUser({
     email,
     password,
-    options: { data: { fullName } },
+    fullName,
+    emailConfirm: true,
+    role: 'CUSTOMER',
   });
-
-  if (error) {
-    if (String(error.message).toLowerCase().includes('already')) {
-      throw new HttpError(409, 'An account with this email already exists');
-    }
-    throw new HttpError(400, error.message);
-  }
-
-  const user = data.user;
-  if (!user?.id) {
-    throw new HttpError(400, 'Registration did not return a user. Confirm email settings in Supabase Auth.');
-  }
 
   try {
     return await prisma.$transaction(async (tx) => {
@@ -82,6 +74,7 @@ export async function createStaffAccount({ email, password, fullName }) {
     password,
     fullName,
     emailConfirm: true,
+    role: 'STAFF',
   });
 
   try {
@@ -109,9 +102,9 @@ export async function getSession(profile) {
   };
 }
 
-export async function listUsers({ page = 1, pageSize = 20 }) {
+export async function listUsers({ page = 1, pageSize = 20 } = {}) {
   const skip = (page - 1) * pageSize;
-  const [items, total] = await prisma.$transaction([
+  const [items, total] = await Promise.all([
     prisma.userProfile.findMany({
       skip,
       take: pageSize,
@@ -123,16 +116,23 @@ export async function listUsers({ page = 1, pageSize = 20 }) {
         role: true,
         isActive: true,
         createdAt: true,
+        customer: { select: { id: true, companyName: true } },
       },
     }),
     prisma.userProfile.count(),
   ]);
 
-  return { items, total, page, pageSize };
+  return {
+    items,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize) || 1,
+  };
 }
 
-export function assertRoleImmutable(body) {
-  if (body && Object.prototype.hasOwnProperty.call(body, 'role')) {
-    throw new HttpError(400, 'Role cannot be set from this request');
+export function assertRoleImmutable(payload) {
+  if (payload && 'role' in payload) {
+    delete payload.role;
   }
 }
