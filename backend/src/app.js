@@ -14,7 +14,14 @@ export function createApp() {
 
   app.use(
     cors({
-      origin: env.frontendOrigin,
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile/curl), configured origin, or any localhost port in dev
+        if (!origin || origin === env.frontendOrigin || /^http:\/\/localhost:\d+$/.test(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true,
     }),
   );
