@@ -48,6 +48,9 @@ describe('quotation expiration and acceptance', () => {
       customerId: 'cust-1',
     };
     const actor = { role: 'CUSTOMER', customer: { id: 'cust-2' } };
-    assert.throws(() => assertCanAccept({ subscription, actor }), /own quotation/);
+    assert.throws(
+      () => assertCanAccept({ subscription, actor, now: new Date('2026-01-15T00:00:00Z') }),
+      /own quotation/,
+    );
   });
 });

@@ -7,6 +7,11 @@ import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { UsersPage } from '@/pages/admin/UsersPage';
 import { RoleHome } from '@/pages/dashboards/RoleHome';
+import { CustomersPage } from '@/pages/customers/CustomersPage';
+import { TemplatesPage } from '@/pages/templates/TemplatesPage';
+import { SubscriptionsPage } from '@/pages/subscriptions/SubscriptionsPage';
+import { NewSubscriptionPage } from '@/pages/subscriptions/NewSubscriptionPage';
+import { SubscriptionDetailPage } from '@/pages/subscriptions/SubscriptionDetailPage';
 
 function HomeRedirect() {
   const { loading, profile, session } = useAuth();
@@ -25,19 +30,31 @@ export default function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
+      {/* ADMIN ROUTES */}
       <Route element={<ProtectedRoute roles={['ADMIN']} />}>
         <Route element={<AppShell />}>
           <Route path="/admin" element={<RoleHome role="ADMIN" />} />
           <Route path="/admin/users" element={<UsersPage />} />
+          <Route path="/admin/customers" element={<CustomersPage />} />
+          <Route path="/admin/templates" element={<TemplatesPage />} />
+          <Route path="/admin/subscriptions" element={<SubscriptionsPage />} />
+          <Route path="/admin/subscriptions/new" element={<NewSubscriptionPage />} />
+          <Route path="/admin/subscriptions/:id" element={<SubscriptionDetailPage />} />
         </Route>
       </Route>
 
+      {/* STAFF ROUTES */}
       <Route element={<ProtectedRoute roles={['STAFF']} />}>
         <Route element={<AppShell />}>
           <Route path="/staff" element={<RoleHome role="STAFF" />} />
+          <Route path="/staff/customers" element={<CustomersPage />} />
+          <Route path="/staff/subscriptions" element={<SubscriptionsPage />} />
+          <Route path="/staff/subscriptions/new" element={<NewSubscriptionPage />} />
+          <Route path="/staff/subscriptions/:id" element={<SubscriptionDetailPage />} />
         </Route>
       </Route>
 
+      {/* CUSTOMER PORTAL */}
       <Route element={<ProtectedRoute roles={['CUSTOMER']} />}>
         <Route element={<AppShell />}>
           <Route path="/customer" element={<RoleHome role="CUSTOMER" />} />
