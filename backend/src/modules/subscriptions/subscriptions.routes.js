@@ -24,7 +24,7 @@ subscriptionsRouter.get(
 subscriptionsRouter.post(
   '/',
   requireAuth,
-  requireRole('ADMIN', 'STAFF'),
+  requireRole('ADMIN', 'STAFF', 'CUSTOMER'),
   validate(createSubscriptionSchema),
   controller.createSubscription,
 );
@@ -62,7 +62,7 @@ subscriptionsRouter.post(
 subscriptionsRouter.post(
   '/:id/activate',
   requireAuth,
-  requireRole('ADMIN', 'STAFF'),
+  requireRole('ADMIN', 'STAFF', 'CUSTOMER'),
   validate(subscriptionIdParamSchema),
   controller.activateSubscription,
 );
@@ -70,7 +70,7 @@ subscriptionsRouter.post(
 subscriptionsRouter.post(
   '/:id/pause',
   requireAuth,
-  requireRole('ADMIN', 'STAFF'),
+  requireRole('ADMIN', 'STAFF', 'CUSTOMER'),
   validate(pauseSubscriptionSchema),
   controller.pauseSubscription,
 );
@@ -78,7 +78,7 @@ subscriptionsRouter.post(
 subscriptionsRouter.post(
   '/:id/resume',
   requireAuth,
-  requireRole('ADMIN', 'STAFF'),
+  requireRole('ADMIN', 'STAFF', 'CUSTOMER'),
   validate(subscriptionIdParamSchema),
   controller.resumeSubscription,
 );
@@ -94,7 +94,7 @@ subscriptionsRouter.post(
 subscriptionsRouter.post(
   '/:id/close',
   requireAuth,
-  requireRole('ADMIN', 'STAFF'),
+  requireRole('ADMIN', 'STAFF', 'CUSTOMER'),
   validate(closeSubscriptionSchema),
   controller.closeSubscription,
 );

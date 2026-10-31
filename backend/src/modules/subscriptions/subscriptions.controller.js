@@ -1,11 +1,34 @@
 import * as subscriptionService from './subscriptions.service.js';
+import { HttpError } from '../../utils/httpError.js';
 
 export async function createSubscription(req, res, next) {
   try {
-    const subscription = await subscriptionService.createSubscription(req.body, req.profile);
+    const data = { ...req.body };
+    if (req.profile.role === 'CUSTOMER') {
+      const ownCustomerId = req.profile.customer?.id;
+      if (!ownCustomerId) {
+        throw new HttpError(400, 'Your user account does not have an associated customer profile');
+      }
+      data.customerId = ownCustomerId;
+    } else if (!data.customerId) {
+      throw new HttpError(400, 'customerId is required');
+    }
+
+    const subscription = await subscriptionService.createSubscription(data, req.profile);
+
+    // If customer requests a subscription, immediately submit as QUOTATION
+    let finalSub = subscription;
+    if (req.profile.role === 'CUSTOMER') {
+      finalSub = await subscriptionService.submitQuotation(subscription.id, req.profile);
+    }
+
     res.status(201).json({
       success: true,
-      data: subscription,
+      message:
+        req.profile.role === 'CUSTOMER'
+          ? 'Subscription quotation submitted successfully'
+          : 'Subscription created successfully',
+      data: finalSub,
     });
   } catch (error) {
     next(error);

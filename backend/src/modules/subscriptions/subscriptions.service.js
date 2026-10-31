@@ -117,7 +117,29 @@ export async function createSubscription(data, actor) {
       };
     });
   } else {
-    throw new HttpError(400, 'Subscription must have at least one product line');
+    // If no custom lines or template provided, attach first active product
+    const defaultProduct = await prisma.product.findFirst({
+      where: { isActive: true },
+      include: { taxRules: { include: { taxRule: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (defaultProduct) {
+      const defaultTax =
+        defaultProduct.taxRules?.find((tr) => tr.taxRule?.isDefault)?.taxRule?.ratePercent ?? 0;
+      linesToCreate = [
+        {
+          productId: defaultProduct.id,
+          variantId: null,
+          quantity: plan.minQuantity ?? 1,
+          unitPrice: Number(defaultProduct.salesPrice),
+          taxRatePercent: Number(defaultTax),
+          lineAmount: (plan.minQuantity ?? 1) * Number(defaultProduct.salesPrice),
+          sortOrder: 0,
+        },
+      ];
+    } else {
+      throw new HttpError(400, 'Subscription must have at least one product line');
+    }
   }
 
   // Validate discount rules if supplied
@@ -540,6 +562,10 @@ export async function activateSubscription(id, actor) {
     throw new HttpError(404, 'Subscription not found');
   }
 
+  if (actor?.role === 'CUSTOMER' && subscription.customerId !== actor.customer?.id) {
+    throw new HttpError(403, 'You can only manage your own subscriptions');
+  }
+
   if (subscription.status !== 'CONFIRMED' && subscription.status !== 'DRAFT') {
     throw new HttpError(409, `Cannot activate subscription in '${subscription.status}' status`);
   }
@@ -578,6 +604,10 @@ export async function pauseSubscription(id, reason, actor) {
     throw new HttpError(404, 'Subscription not found');
   }
 
+  if (actor?.role === 'CUSTOMER' && subscription.customerId !== actor.customer?.id) {
+    throw new HttpError(403, 'You can only manage your own subscriptions');
+  }
+
   if (subscription.status !== 'ACTIVE') {
     throw new HttpError(409, 'Only ACTIVE subscriptions can be paused');
   }
@@ -613,6 +643,10 @@ export async function resumeSubscription(id, actor) {
   });
   if (!subscription) {
     throw new HttpError(404, 'Subscription not found');
+  }
+
+  if (actor?.role === 'CUSTOMER' && subscription.customerId !== actor.customer?.id) {
+    throw new HttpError(403, 'You can only manage your own subscriptions');
   }
 
   if (subscription.status !== 'PAUSED') {
@@ -694,6 +728,10 @@ export async function closeSubscription(id, reason, actor) {
   });
   if (!subscription) {
     throw new HttpError(404, 'Subscription not found');
+  }
+
+  if (actor?.role === 'CUSTOMER' && subscription.customerId !== actor.customer?.id) {
+    throw new HttpError(403, 'You can only cancel your own subscriptions');
   }
 
   if (subscription.status === 'CLOSED') {

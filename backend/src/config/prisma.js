@@ -1,8 +1,18 @@
 import { PrismaClient } from '@prisma/client';
 
 /**
- * Privileged database client. This connection bypasses any Supabase RLS.
- * Authorization must be enforced in services (role checks + ownership filters)
- * before every query. Never pass client-supplied IDs through without checks.
+ * Privileged database client singleton.
+ * Uses globalThis caching in non-production environments to prevent connection
+ * pool exhaustion during nodemon hot-reloads.
  */
-export const prisma = new PrismaClient();
+const globalForPrisma = globalThis;
+
+export const prisma =
+  globalForPrisma.__prisma ||
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.__prisma = prisma;
+}

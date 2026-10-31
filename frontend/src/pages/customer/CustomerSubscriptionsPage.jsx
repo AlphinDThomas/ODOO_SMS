@@ -68,6 +68,10 @@ export function CustomerSubscriptionsPage() {
   const [error, setError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
   const [acceptingId, setAcceptingId] = useState(null);
+  const [activatingId, setActivatingId] = useState(null);
+  const [pausingId, setPausingId] = useState(null);
+  const [resumingId, setResumingId] = useState(null);
+  const [closingId, setClosingId] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -119,6 +123,75 @@ export function CustomerSubscriptionsPage() {
       );
     } finally {
       setAcceptingId(null);
+    }
+  }
+
+  async function handleActivateSubscription(subscriptionId) {
+    setError('');
+    setActionSuccess('');
+    setActivatingId(subscriptionId);
+
+    try {
+      await api.post(`/subscriptions/${subscriptionId}/activate`);
+      setActionSuccess('Subscription activated successfully! Recurring billing is now active.');
+      await refreshData();
+    } catch (err) {
+      console.error('Activate subscription failed:', err);
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          'Failed to activate subscription.',
+      );
+    } finally {
+      setActivatingId(null);
+    }
+  }
+
+  async function handlePauseSubscription(subId) {
+    if (!window.confirm('Are you sure you want to pause this subscription?')) return;
+    setError('');
+    setActionSuccess('');
+    setPausingId(subId);
+    try {
+      await api.post(`/subscriptions/${subId}/pause`, { reason: 'Paused by customer via portal' });
+      setActionSuccess('Subscription paused successfully.');
+      await refreshData();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to pause subscription. It may not permit pausing.');
+    } finally {
+      setPausingId(null);
+    }
+  }
+
+  async function handleResumeSubscription(subId) {
+    setError('');
+    setActionSuccess('');
+    setResumingId(subId);
+    try {
+      await api.post(`/subscriptions/${subId}/resume`);
+      setActionSuccess('Subscription resumed successfully.');
+      await refreshData();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to resume subscription.');
+    } finally {
+      setResumingId(null);
+    }
+  }
+
+  async function handleCloseSubscription(subId) {
+    const reason = window.prompt('Please provide a reason for cancellation (optional):', 'Customer requested cancellation');
+    if (reason === null) return;
+    setError('');
+    setActionSuccess('');
+    setClosingId(subId);
+    try {
+      await api.post(`/subscriptions/${subId}/close`, { reason });
+      setActionSuccess('Subscription cancelled and closed successfully.');
+      await refreshData();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Cancellation rejected. The plan policy may not allow early closure.');
+    } finally {
+      setClosingId(null);
     }
   }
 
@@ -424,19 +497,103 @@ export function CustomerSubscriptionsPage() {
                         )}
                       </Button>
                     </div>
-                  ) : (
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                      <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                        <CheckCircle2 className="size-3.5" />
-                        In Good Standing
-                      </span>
-                      <Link
-                        to="/customer/invoices"
-                        className="font-medium text-slate-700 hover:text-slate-900 hover:underline flex items-center gap-1"
+                  ) : sub.status === 'CONFIRMED' ? (
+                    <div className="pt-2 border-t border-blue-200 space-y-2">
+                      <div className="text-center text-[11px] font-medium text-blue-800">
+                        Quotation confirmed! Ready to activate recurring billing.
+                      </div>
+                      <Button
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
+                        disabled={activatingId === sub.id}
+                        onClick={() => handleActivateSubscription(sub.id)}
                       >
-                        <Receipt className="size-3" />
-                        Billing History
-                      </Link>
+                        {activatingId === sub.id ? (
+                          <>
+                            <RefreshCw className="size-3.5 animate-spin mr-1.5" />
+                            Activating…
+                          </>
+                        ) : (
+                          'Activate Subscription Now'
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="pt-2 border-t border-slate-100 space-y-3">
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        <span className="flex items-center gap-1 font-medium">
+                          {sub.status === 'ACTIVE' && (
+                            <span className="flex items-center gap-1 text-emerald-600">
+                              <CheckCircle2 className="size-3.5" />
+                              Active & In Good Standing
+                            </span>
+                          )}
+                          {sub.status === 'PAUSED' && (
+                            <span className="flex items-center gap-1 text-orange-600">
+                              <Clock className="size-3.5" />
+                              Temporarily Paused
+                            </span>
+                          )}
+                          {sub.status === 'CLOSED' && (
+                            <span className="flex items-center gap-1 text-slate-500">
+                              <X className="size-3.5" />
+                              Cancelled & Closed
+                            </span>
+                          )}
+                        </span>
+                        <Link
+                          to="/customer/invoices"
+                          className="font-medium text-slate-700 hover:text-slate-900 hover:underline flex items-center gap-1"
+                        >
+                          <Receipt className="size-3" />
+                          Billing History
+                        </Link>
+                      </div>
+
+                      {/* Action buttons for ACTIVE / PAUSED */}
+                      {(sub.status === 'ACTIVE' || sub.status === 'PAUSED') && (
+                        <div className="flex items-center gap-2 pt-1 border-t border-slate-50">
+                          {sub.status === 'ACTIVE' && sub.plan?.allowPause && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 text-xs text-orange-700 hover:bg-orange-50 border-orange-200"
+                              disabled={pausingId === sub.id}
+                              onClick={() => handlePauseSubscription(sub.id)}
+                            >
+                              {pausingId === sub.id ? (
+                                <RefreshCw className="size-3 animate-spin mr-1" />
+                              ) : null}
+                              Pause
+                            </Button>
+                          )}
+                          {sub.status === 'PAUSED' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 text-xs text-indigo-700 hover:bg-indigo-50 border-indigo-200"
+                              disabled={resumingId === sub.id}
+                              onClick={() => handleResumeSubscription(sub.id)}
+                            >
+                              {resumingId === sub.id ? (
+                                <RefreshCw className="size-3 animate-spin mr-1" />
+                              ) : null}
+                              Resume
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 text-xs text-red-700 hover:bg-red-50 border-red-200"
+                            disabled={closingId === sub.id}
+                            onClick={() => handleCloseSubscription(sub.id)}
+                          >
+                            {closingId === sub.id ? (
+                              <RefreshCw className="size-3 animate-spin mr-1" />
+                            ) : null}
+                            Cancel Subscription
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardContent>

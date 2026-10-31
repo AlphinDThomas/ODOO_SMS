@@ -11,7 +11,7 @@ const subscriptionLineInputSchema = z.object({
 
 export const createSubscriptionSchema = z.object({
   body: z.object({
-    customerId: z.string().uuid('Invalid customer UUID'),
+    customerId: z.string().uuid('Invalid customer UUID').optional(),
     planId: z.string().uuid('Invalid plan UUID'),
     templateId: z.string().uuid('Invalid template UUID').optional().nullable(),
     startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}/, 'Start date must be YYYY-MM-DD').optional(),
