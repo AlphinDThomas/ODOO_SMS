@@ -5,6 +5,9 @@ import { env } from './config/env.js';
 import { openapiDocument } from './docs/openapi.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authRouter, usersRouter } from './modules/auth/auth.routes.js';
+import { billingRouter } from './modules/billing/billing.routes.js';
+import { invoicesRouter } from './modules/invoices/invoices.routes.js';
+import { paymentsRouter } from './modules/payments/payments.routes.js';
 import { portalRouter } from './modules/portal/portal.routes.js';
 import { reportsRouter } from './modules/reports/reports.routes.js';
 
@@ -28,6 +31,9 @@ export function createApp() {
 
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/users', usersRouter);
+  app.use('/api/v1/billing', billingRouter);
+  app.use('/api/v1/invoices', invoicesRouter);
+  app.use('/api/v1/payments', paymentsRouter);
   app.use('/api/v1/portal', portalRouter);
   app.use('/api/v1/reports', reportsRouter);
 

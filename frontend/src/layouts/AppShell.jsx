@@ -19,10 +19,12 @@ import { cn } from '@/lib/utils';
 const NAV = {
   ADMIN: [
     { to: '/admin', label: 'Finance Analytics', icon: BarChart3 },
+    { to: '/admin/invoices', label: 'Invoices & Billing', icon: Receipt },
     { to: '/admin/users', label: 'Staff & Users', icon: Users },
   ],
   STAFF: [
     { to: '/staff', label: 'Finance Analytics', icon: BarChart3 },
+    { to: '/staff/invoices', label: 'Invoices & Billing', icon: Receipt },
   ],
   CUSTOMER: [
     { to: '/customer', label: 'Customer Portal', icon: LayoutDashboard },

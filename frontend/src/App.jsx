@@ -8,6 +8,8 @@ import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { UsersPage } from '@/pages/admin/UsersPage';
 import { CustomerPortalPage } from '@/pages/customer/CustomerPortalPage';
 import { FinanceDashboardPage } from '@/pages/dashboards/FinanceDashboardPage';
+import { InvoicesPage } from '@/pages/invoices/InvoicesPage';
+import { InvoiceDetailPage } from '@/pages/invoices/InvoiceDetailPage';
 
 function HomeRedirect() {
   const { loading, profile, session } = useAuth();
@@ -30,6 +32,8 @@ export default function App() {
       <Route element={<ProtectedRoute roles={['ADMIN']} />}>
         <Route element={<AppShell />}>
           <Route path="/admin" element={<FinanceDashboardPage role="ADMIN" />} />
+          <Route path="/admin/invoices" element={<InvoicesPage />} />
+          <Route path="/admin/invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="/admin/users" element={<UsersPage />} />
         </Route>
       </Route>
@@ -38,6 +42,8 @@ export default function App() {
       <Route element={<ProtectedRoute roles={['STAFF']} />}>
         <Route element={<AppShell />}>
           <Route path="/staff" element={<FinanceDashboardPage role="STAFF" />} />
+          <Route path="/staff/invoices" element={<InvoicesPage />} />
+          <Route path="/staff/invoices/:id" element={<InvoiceDetailPage />} />
         </Route>
       </Route>
 
@@ -45,6 +51,8 @@ export default function App() {
       <Route element={<ProtectedRoute roles={['CUSTOMER']} />}>
         <Route element={<AppShell />}>
           <Route path="/customer" element={<CustomerPortalPage />} />
+          <Route path="/customer/invoices" element={<InvoicesPage />} />
+          <Route path="/customer/invoices/:id" element={<InvoiceDetailPage />} />
         </Route>
       </Route>
     </Routes>
